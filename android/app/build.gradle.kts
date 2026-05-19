@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.chaudhary.traders"
-    compileSdk = 36
+    compileSdk = 34
     ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.chaudhary.traders"
         minSdk = 21
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
     }
