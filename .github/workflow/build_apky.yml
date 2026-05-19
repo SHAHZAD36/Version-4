@@ -34,7 +34,7 @@ jobs:
           flutter clean
           flutter pub get
 
-      - name: Build Release APK
+- name: Build Release APK
         run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
 
       - name: Rename APK for tracking
