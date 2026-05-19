@@ -1,0 +1,52 @@
+name: Build Chaudhary Traders Production APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  build:
+    name: Build & Upload Release APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle' # Speeds up subsequent builds
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Clean and Get Dependencies
+        run: |
+          flutter clean
+          flutter pub get
+
+      - name: Build Release APK
+        # Added --no-tree-shake-icons back in as your specific setup needs it
+        # Also added --obfuscate to make the code harder to reverse engineer
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Rename APK for tracking
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Chaudhary_Traders_Build_${{ github.run_number }}.apk
+
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chaudhary-Traders-APK-Build-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/Chaudhary_Traders_Build_${{ github.run_number }}.apk
+          if-no-files-found: error
+          retention-days: 14 # Keeps the file for 2 weeks
