@@ -38,3 +38,7 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    implementation("io.flutter:flutter_embedding_release")
+}
