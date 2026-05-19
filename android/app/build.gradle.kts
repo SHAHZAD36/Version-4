@@ -40,6 +40,6 @@ flutter {
 }
 
 dependencies {
-    // Removed the explicit flutter_embedding_release dependency
-    // It's now managed by the dev.flutter.flutter-gradle-plugin
+    implementation("io.flutter:flutter_embedding_release")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0")
 }
