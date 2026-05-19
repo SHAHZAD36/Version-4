@@ -35,9 +35,7 @@ jobs:
           flutter pub get
 
       - name: Build Release APK
-        # Added --no-tree-shake-icons back in as your specific setup needs it
-        # Also added --obfuscate to make the code harder to reverse engineer
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
 
       - name: Rename APK for tracking
         run: |
