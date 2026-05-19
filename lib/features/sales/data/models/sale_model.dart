@@ -5,8 +5,7 @@ class SaleModel {
   final double totalAmount;
   final double discount;
   final double netAmount;
-  final String paymentType; // 'Cash' or 'Credit'
-  final String? notes;
+  final String paymentType;
 
   SaleModel({
     this.id,
@@ -16,34 +15,29 @@ class SaleModel {
     required this.discount,
     required this.netAmount,
     required this.paymentType,
-    this.notes,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'customer_id': customerId,
-      'date': date,
-      'total_amount': totalAmount,
-      'discount': discount,
-      'net_amount': netAmount,
-      'payment_type': paymentType,
-      'notes': notes,
-    };
-  }
+  // Map to Object (for reading from database)
+  factory SaleModel.fromJson(Map<String, dynamic> json) => SaleModel(
+        id: json['id'],
+        customerId: json['customer_id'],
+        date: json['date'],
+        totalAmount: (json['total_amount'] as num).toDouble(),
+        discount: (json['discount'] as num).toDouble(),
+        netAmount: (json['net_amount'] as num).toDouble(),
+        paymentType: json['payment_type'],
+      );
 
-  factory SaleModel.fromMap(Map<String, dynamic> map) {
-    return SaleModel(
-      id: map['id'],
-      customerId: map['customer_id'],
-      date: map['date'],
-      totalAmount: map['total_amount'],
-      discount: map['discount'],
-      netAmount: map['net_amount'],
-      paymentType: map['payment_type'],
-      notes: map['notes'],
-    );
-  }
+  // Object to Map (for saving to database)
+  Map<String, dynamic> toJson() => {
+        if (id != null) 'id': id,
+        'customer_id': customerId,
+        'date': date,
+        'total_amount': totalAmount,
+        'discount': discount,
+        'net_amount': netAmount,
+        'payment_type': paymentType,
+      };
 }
 
 class SaleItemModel {
@@ -63,25 +57,11 @@ class SaleItemModel {
     required this.total,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'sale_id': saleId,
-      'product_id': productId,
-      'quantity': quantity,
-      'rate': rate,
-      'total': total,
-    };
-  }
-
-  factory SaleItemModel.fromMap(Map<String, dynamic> map) {
-    return SaleItemModel(
-      id: map['id'],
-      saleId: map['sale_id'],
-      productId: map['product_id'],
-      quantity: map['quantity'],
-      rate: map['rate'],
-      total: map['total'],
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'sale_id': saleId,
+        'product_id': productId,
+        'quantity': quantity,
+        'rate': rate,
+        'total': total,
+      };
 }
