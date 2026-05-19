@@ -1,39 +1,60 @@
-// Fetching only today's sales
+import '../../../../core/utils/database_helper.dart'; // Correctly links to your database
+import '../models/sale_model.dart';                // Correctly links to the Sale Model
+import '../../domain/repositories/sale_repository.dart';
+
 class SaleRepositoryImpl implements SaleRepository {
-  // 1. ADD THIS LINE if it is missing
-  final DatabaseHelper _dbHelper; 
+  final DatabaseHelper databaseHelper;
 
-  // 2. The constructor should look like this
-  SaleRepositoryImpl(this._dbHelper);
+  SaleRepositoryImpl(this.databaseHelper);
 
+  @override
   Future<List<SaleModel>> getSales() async {
-    // 3. Use the _dbHelper here
-    final db = await _dbHelper.database; 
-    // ... rest of the code ...
+    final db = await databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query('sales', orderBy: 'id DESC');
+    return maps.map((item) => SaleModel.fromJson(item)).toList();
   }
-}
 
-Future<List<SaleModel>> getTodaySales() async {
-  final db = await databaseHelper.database;
-  final String today = DateTime.now().toString().split(' ')[0]; // Gets "2023-10-27"
-  
-  final List<Map<String, dynamic>> maps = await db.query(
-    'sales',
-    where: 'date = ?',
-    whereArgs: [today],
-    orderBy: 'id DESC',
-  );
-  return maps.map((item) => SaleModel.fromJson(item)).toList();
-}
+  // Logic to refresh and get only Today's sales (Daily Refresh)
+  @override
+  Future<List<SaleModel>> getTodaySales(String date) async {
+    final db = await databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'sales', 
+      where: 'date LIKE ?', 
+      whereArgs: ['$date%']
+    );
+    return maps.map((item) => SaleModel.fromJson(item)).toList();
+  }
 
-// Delete a sale
-Future<void> deleteSale(int id) async {
-  final db = await databaseHelper.database;
-  await db.delete('sales', where: 'id = ?', whereArgs: [id]);
-}
+  @override
+  Future<void> createSale(SaleModel sale, List<SaleItemModel> items) async {
+    final db = await databaseHelper.database;
+    await db.transaction((txn) async {
+      int saleId = await txn.insert('sales', sale.toJson());
+      for (var item in items) {
+        await txn.insert('sale_items', {
+          ...item.toJson(),
+          'sale_id': saleId,
+        });
+      }
+    });
+  }
 
-// Edit/Update a sale
-Future<void> updateSale(SaleModel sale) async {
-  final db = await databaseHelper.database;
-  await db.update('sales', sale.toJson(), where: 'id = ?', whereArgs: [sale.id]);
+  @override
+  Future<void> deleteSale(int id) async {
+    final db = await databaseHelper.database;
+    await db.delete('sales', where: 'id = ?', whereArgs: [id]);
+    await db.delete('sale_items', where: 'sale_id = ?', whereArgs: [id]);
+  }
+
+  @override
+  Future<void> updateSale(SaleModel sale) async {
+    final db = await databaseHelper.database;
+    await db.update(
+      'sales', 
+      sale.toJson(), 
+      where: 'id = ?', 
+      whereArgs: [sale.id]
+    );
+  }
 }
