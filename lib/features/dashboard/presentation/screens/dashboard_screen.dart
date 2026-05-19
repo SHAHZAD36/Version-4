@@ -186,7 +186,7 @@ class DashboardScreen extends ConsumerWidget {
       _tile(context, Icons.money_off, AppStrings.getText(lang, 'expenses'), () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpenseListScreen())); }),
       _tile(context, Icons.book, AppStrings.getText(lang, 'cash_book'), () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const CashBookScreen())); }),
       const Divider(),
-      _tile(context, Icons.bar_chart, AppStrings.getText(lang, 'reports'), () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen())); }),
+      _tile(context, Icons.bar_chart, AppStrings.getText(lang, 'reports'), () () { Navigator.push(context, MaterialPageRoute(builder: (_) => ReportsScreen())); },
       _tile(context, Icons.settings, AppStrings.getText(lang, 'settings'), () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); }),
     ]));
   }
