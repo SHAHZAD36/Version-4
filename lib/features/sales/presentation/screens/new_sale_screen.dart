@@ -211,7 +211,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
       pw.Page(
         pageFormat: PdfPageFormat.roll80,
         build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlign.center,
+          crossAxisAlignment: pw.CrossAxisAlignment.center, // Added 'ment'
           children: [
             if(logoImage != null) pw.Image(logoImage, width: 80),
             pw.Text("CHAUDHARY TRADERS", style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18)),
