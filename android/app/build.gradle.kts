@@ -40,5 +40,6 @@ flutter {
 }
 
 dependencies {
-    implementation("io.flutter:flutter_embedding_release")
+    // Removed the explicit flutter_embedding_release dependency
+    // It's now managed by the dev.flutter.flutter-gradle-plugin
 }
