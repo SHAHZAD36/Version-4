@@ -24,9 +24,8 @@ class SaleNotifier extends StateNotifier<List<SaleModel>> {
     // Add this inside the SaleNotifier class
 Future<void> deleteSale(int id) async {
   final repository = ref.read(saleRepositoryProvider); // Make sure your repository provider name matches
-  await repository.deleteSale(id);
-  // Refresh the list after deleting
-  state = await repository.getSales(); 
+await _repository.deleteSale(id);
+state = await _repository.getSales();
 }
   }
 
