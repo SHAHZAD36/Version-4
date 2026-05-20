@@ -33,7 +33,11 @@ jobs:
         run: |
           mkdir -p android/app/src/main/kotlin/com/chaudhary/traders
           printf 'package com.chaudhary.traders\nimport io.flutter.embedding.android.FlutterFragmentActivity\nclass MainActivity: FlutterFragmentActivity()' > android/app/src/main/kotlin/com/chaudhary/traders/MainActivity.kt
-          cat android/app/src/main/kotlin/com/chaudhary/traders/MainActivity.kt
+
+      - name: Fix v1 Embedding
+        run: |
+          find android -name "AndroidManifest.xml" -exec sed -i '/flutterEmbedding/d' {} \;
+          find android -name "GeneratedPluginRegistrant*" -delete 2>/dev/null || true
 
       - name: Install dependencies
         run: |
