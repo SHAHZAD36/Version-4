@@ -29,18 +29,24 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Fix MainActivity
+      - name: Navigate to correct directory and fix MainActivity
         run: |
+          cd android_FRESH/android_fresh
           mkdir -p android/app/src/main/kotlin/com/chaudhary/traders
           printf 'package com.chaudhary.traders\nimport io.flutter.embedding.android.FlutterActivity\nclass MainActivity: FlutterActivity()' > android/app/src/main/kotlin/com/chaudhary/traders/MainActivity.kt
 
       - name: Fix AndroidManifest v2 Embedding
         run: |
+          cd android_FRESH/android_fresh
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           cat > $MANIFEST << 'XMLEOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
               <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                  android:maxSdkVersion="32"/>
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+                  android:maxSdkVersion="32"/>
               <application
                   android:label="Chaudhary Traders"
                   android:name="${applicationName}"
@@ -72,14 +78,18 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd android_FRESH/android_fresh
           flutter clean
           flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          cd android_FRESH/android_fresh
+          flutter build apk --release --no-tree-shake-icons
 
       - name: Rename APK
         run: |
+          cd android_FRESH/android_fresh
           mv build/app/outputs/flutter-apk/app-release.apk \
              build/app/outputs/flutter-apk/Chaudhary_Traders_v${{ github.run_number }}.apk
 
@@ -87,6 +97,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Chaudhary-Traders-APK
-          path: build/app/outputs/flutter-apk/Chaudhary_Traders_v${{ github.run_number }}.apk
+          path: android_FRESH/android_fresh/build/app/outputs/flutter-apk/Chaudhary_Traders_v${{ github.run_number }}.apk
           if-no-files-found: error
           retention-days: 7
