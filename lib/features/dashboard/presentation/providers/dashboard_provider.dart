@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../../../core/utils/database_helper.dart';
 
 class DashboardStats {
@@ -20,36 +21,70 @@ class DashboardStats {
 }
 
 class DashboardNotifier extends StateNotifier<AsyncValue<DashboardStats>> {
-  final DatabaseHelper _db;
-  DashboardNotifier(this._db) : super(const AsyncValue.loading()) { loadStats(); }
+  DashboardNotifier() : super(const AsyncValue.loading()) {
+    loadStats();
+  }
 
-  Future<void> loadStats() async {
+  Future loadStats() async {
+    state = const AsyncValue.loading();
     try {
-      state = const AsyncValue.loading();
-      final db = await _db.database;
+      final db = await DatabaseHelper.instance.database;
       final today = DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
+      final todayStr = '${today.day.toString().padLeft(2, '0')}-${today.month.toString().padLeft(2, '0')}-${today.year}';
 
-      final s1 = await db.rawQuery("SELECT COALESCE(SUM(net_amount),0) as t FROM sales WHERE date LIKE ?", ['%$todayStr%']);
-      final s2 = await db.rawQuery("SELECT COALESCE(SUM(amount),0) as t FROM collections WHERE date LIKE ?", ['%$todayStr%']);
-      final s3 = await db.rawQuery("SELECT COALESCE(SUM(current_balance),0) as t FROM customers WHERE current_balance > 0");
-      final s4 = await db.rawQuery("SELECT COALESCE(SUM(current_stock * sale_price),0) as t FROM products");
-      final lowStock = await db.rawQuery("SELECT * FROM products WHERE current_stock <= min_stock_level LIMIT 5");
-      final recent = await db.rawQuery('''SELECT s.id, s.date, s.net_amount, s.payment_type, c.shop_name 
-        FROM sales s LEFT JOIN customers c ON s.customer_id = c.id ORDER BY s.id DESC LIMIT 5''');
+      // Today's sales
+      final salesResult = await db.rawQuery(
+        "SELECT SUM(net_amount) as total FROM sales WHERE date LIKE ?",
+        ['$todayStr%']
+      );
+      final todaySales = (salesResult.first['total'] as num?)?.toDouble() ?? 0;
+
+      // Today's collections
+      final collectionsResult = await db.rawQuery(
+        "SELECT SUM(amount) as total FROM collections WHERE date LIKE ?",
+        ['$todayStr%']
+      );
+      final todayCollections = (collectionsResult.first['total'] as num?)?.toDouble() ?? 0;
+
+      // Total receivable
+      final receivableResult = await db.rawQuery(
+        "SELECT SUM(current_balance) as total FROM customers WHERE current_balance > 0"
+      );
+      final totalReceivable = (receivableResult.first['total'] as num?)?.toDouble() ?? 0;
+
+      // Total stock value
+      final stockResult = await db.rawQuery(
+        "SELECT SUM(current_stock * sale_price) as total FROM products"
+      );
+      final totalStockValue = (stockResult.first['total'] as num?)?.toDouble() ?? 0;
+
+      // Recent sales (last 10)
+      final recentSalesResult = await db.rawQuery(
+        '''SELECT s.*, c.shop_name 
+           FROM sales s 
+           LEFT JOIN customers c ON s.customer_id = c.id 
+           ORDER BY s.id DESC LIMIT 10'''
+      );
+
+      // Low stock products
+      final lowStockResult = await db.rawQuery(
+        "SELECT * FROM products WHERE current_stock <= min_stock_level ORDER BY current_stock ASC LIMIT 10"
+      );
 
       state = AsyncValue.data(DashboardStats(
-        todaySales: (s1.first['t'] as num).toDouble(),
-        todayCollections: (s2.first['t'] as num).toDouble(),
-        totalReceivable: (s3.first['t'] as num).toDouble(),
-        totalStockValue: (s4.first['t'] as num).toDouble(),
-        recentSales: List<Map<String, dynamic>>.from(recent),
-        lowStockProducts: List<Map<String, dynamic>>.from(lowStock),
+        todaySales: todaySales,
+        todayCollections: todayCollections,
+        totalReceivable: totalReceivable,
+        totalStockValue: totalStockValue,
+        recentSales: recentSalesResult,
+        lowStockProducts: lowStockResult,
       ));
-    } catch (e, st) { state = AsyncValue.error(e, st); }
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
   }
 }
 
 final dashboardProvider = StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardStats>>((ref) {
-  return DashboardNotifier(DatabaseHelper.instance);
+  return DashboardNotifier();
 });
