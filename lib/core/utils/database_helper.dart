@@ -17,176 +17,154 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _upgradeDB);
   }
 
   Future _createDB(Database db, int version) async {
-    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const textType = 'TEXT NOT NULL';
-    const textNullableType = 'TEXT';
-    const boolType = 'INTEGER NOT NULL';
-    const integerType = 'INTEGER NOT NULL';
-    const doubleType = 'REAL NOT NULL';
-
-    // Users Table
+    // Users table for PIN
     await db.execute('''
       CREATE TABLE users (
-        id $idType,
-        pin $textType,
-        use_fingerprint $boolType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pin TEXT NOT NULL DEFAULT '1234',
+        biometric_enabled INTEGER NOT NULL DEFAULT 1
       )
     ''');
 
-    // Products Table
+    // Insert default user
+    await db.insert('users', {'pin': '1234', 'biometric_enabled': 1});
+
+    // Products table
     await db.execute('''
       CREATE TABLE products (
-        id $idType,
-        name $textType,
-        brand $textNullableType,
-        category $textNullableType,
-        unit_size $textNullableType,
-        purchase_price $doubleType,
-        sale_price $doubleType,
-        opening_stock $doubleType,
-        current_stock $doubleType,
-        min_stock_level $doubleType,
-        notes $textNullableType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        brand TEXT,
+        purchase_price REAL NOT NULL DEFAULT 0,
+        sale_price REAL NOT NULL DEFAULT 0,
+        opening_stock REAL NOT NULL DEFAULT 0,
+        current_stock REAL NOT NULL DEFAULT 0,
+        min_stock_level REAL NOT NULL DEFAULT 10
       )
     ''');
 
-    // Customers Table
+    // Customers table
     await db.execute('''
       CREATE TABLE customers (
-        id $idType,
-        shop_name $textType,
-        owner_name $textNullableType,
-        phone $textNullableType,
-        area $textNullableType,
-        address $textNullableType,
-        opening_balance $doubleType,
-        credit_limit $doubleType,
-        current_balance $doubleType,
-        notes $textNullableType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        shop_name TEXT NOT NULL,
+        owner_name TEXT,
+        phone TEXT,
+        area TEXT,
+        opening_balance REAL NOT NULL DEFAULT 0,
+        current_balance REAL NOT NULL DEFAULT 0,
+        credit_limit REAL NOT NULL DEFAULT 50000
       )
     ''');
 
-    // Sales Table
+    // Sales table
     await db.execute('''
       CREATE TABLE sales (
-        id $idType,
-        customer_id $integerType,
-        date $textType,
-        total_amount $doubleType,
-        discount $doubleType,
-        net_amount $doubleType,
-        payment_type $textType,
-        notes $textNullableType,
-        FOREIGN KEY (customer_id) REFERENCES customers (id)
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        total_amount REAL NOT NULL DEFAULT 0,
+        discount REAL NOT NULL DEFAULT 0,
+        net_amount REAL NOT NULL DEFAULT 0,
+        payment_type TEXT NOT NULL DEFAULT 'Cash'
       )
     ''');
 
-    // Sale Items Table
+    // Sale items table
     await db.execute('''
       CREATE TABLE sale_items (
-        id $idType,
-        sale_id $integerType,
-        product_id $integerType,
-        quantity $doubleType,
-        rate $doubleType,
-        total $doubleType,
-        FOREIGN KEY (sale_id) REFERENCES sales (id),
-        FOREIGN KEY (product_id) REFERENCES products (id)
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sale_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity REAL NOT NULL DEFAULT 0,
+        rate REAL NOT NULL DEFAULT 0,
+        total REAL NOT NULL DEFAULT 0
       )
     ''');
 
-    // Collections Table
-    await db.execute('''
-      CREATE TABLE collections (
-        id $idType,
-        customer_id $integerType,
-        date $textType,
-        amount $doubleType,
-        payment_method $textType,
-        notes $textNullableType,
-        FOREIGN KEY (customer_id) REFERENCES customers (id)
-      )
-    ''');
-
-    // Purchases Table
-    await db.execute('''
-      CREATE TABLE purchases (
-        id $idType,
-        product_id $integerType,
-        supplier_name $textNullableType,
-        date $textType,
-        quantity $doubleType,
-        cost_price $doubleType,
-        total_cost $doubleType,
-        FOREIGN KEY (product_id) REFERENCES products (id)
-      )
-    ''');
-
-    // Expenses Table
+    // Expenses table
     await db.execute('''
       CREATE TABLE expenses (
-        id $idType,
-        category $textType,
-        amount $doubleType,
-        date $textType,
-        description $textNullableType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        amount REAL NOT NULL DEFAULT 0,
+        date TEXT NOT NULL,
+        description TEXT
       )
     ''');
 
-    // Cash Book Table
+    // Cash book table
     await db.execute('''
       CREATE TABLE cash_book (
-        id $idType,
-        date $textType,
-        opening_cash $doubleType,
-        cash_in $doubleType,
-        cash_out $doubleType,
-        closing_cash $doubleType,
-        notes $textNullableType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        opening_cash REAL NOT NULL DEFAULT 0,
+        cash_in REAL NOT NULL DEFAULT 0,
+        cash_out REAL NOT NULL DEFAULT 0,
+        closing_cash REAL NOT NULL DEFAULT 0,
+        notes TEXT
       )
     ''');
 
-    // Settings Table
+    // Purchases table
+    await db.execute('''
+      CREATE TABLE purchases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        supplier TEXT NOT NULL,
+        date TEXT NOT NULL,
+        total_amount REAL NOT NULL DEFAULT 0
+      )
+    ''');
+
+    // Collections table
+    await db.execute('''
+      CREATE TABLE collections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        amount REAL NOT NULL DEFAULT 0,
+        notes TEXT
+      )
+    ''');
+
+    // Settings table
     await db.execute('''
       CREATE TABLE settings (
-        id $idType,
-        business_name $textType,
-        owner_name $textNullableType,
-        currency_symbol $textType,
-        theme_mode $textType,
-        language $textType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        business_name TEXT,
+        owner_name TEXT,
+        currency_symbol TEXT DEFAULT 'Rs.',
+        theme_mode TEXT DEFAULT 'light',
+        language TEXT DEFAULT 'ur'
       )
     ''');
 
-    // Backups Table
-    await db.execute('''
-      CREATE TABLE backups (
-        id $idType,
-        date $textType,
-        file_path $textType,
-        type $textType
-      )
-    ''');
-    
-    // Seed initial user
-    await db.insert('users', {'pin': '1234', 'use_fingerprint': 0});
-    
-    // Seed initial settings
+    // Insert default settings
     await db.insert('settings', {
       'business_name': 'Chaudhary Traders',
-      'owner_name': 'Owner',
-      'currency_symbol': 'PKR',
+      'owner_name': '',
+      'currency_symbol': 'Rs.',
       'theme_mode': 'light',
       'language': 'ur'
     });
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add users table if upgrading from version 1
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          pin TEXT NOT NULL DEFAULT '1234',
+          biometric_enabled INTEGER NOT NULL DEFAULT 1
+        )
+      ''');
+      await db.insert('users', {'pin': '1234', 'biometric_enabled': 1});
+    }
   }
 
   Future close() async {
