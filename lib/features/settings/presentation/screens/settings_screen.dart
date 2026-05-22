@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_provider.dart';
 import '../../data/models/settings_model.dart';
 import '../../../../core/providers/language_provider.dart';
-import '../../../../core/localization/app_strings.dart';  // <-- YEH ADD KARO
+import '../../../../core/localization/app_strings.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
-  @override ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+  @override ConsumerState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
