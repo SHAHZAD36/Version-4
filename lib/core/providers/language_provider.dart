@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum AppLanguage { english, urdu }
 
-class LanguageNotifier extends StateNotifier<AppLanguage> {
+class LanguageNotifier extends StateNotifier<<AppLanguage> {
   LanguageNotifier() : super(AppLanguage.urdu);
 
   void toggleLanguage() {
@@ -14,6 +14,6 @@ class LanguageNotifier extends StateNotifier<AppLanguage> {
   }
 }
 
-final languageProvider = StateNotifierProvider<LanguageNotifier, AppLanguage>((ref) {
+final languageProvider = StateNotifierProvider<<LanguageNotifier, AppLanguage>((ref) {
   return LanguageNotifier();
 });
