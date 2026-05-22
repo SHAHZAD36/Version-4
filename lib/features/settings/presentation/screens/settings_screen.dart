@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_provider.dart';
 import '../../data/models/settings_model.dart';
 import '../../../../core/providers/language_provider.dart';
-import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/app_strings.dart';  // <-- YEH ADD KARO
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
