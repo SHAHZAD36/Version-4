@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/app_strings.dart';  // <-- YEH ADD KARO
 import '../../../../core/providers/language_provider.dart';
 import 'report_service.dart';
 
