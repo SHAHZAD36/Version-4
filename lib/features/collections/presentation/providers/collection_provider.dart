@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';  // <-- YEH ADD KARO
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 import '../../../../core/utils/database_helper.dart';
