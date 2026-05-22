@@ -7,13 +7,13 @@ class DatabaseHelper {
 
   DatabaseHelper._init();
 
-  Future<Database> get database async {
+  Future<<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('chaudhary_traders.db');
     return _database!;
   }
 
-  Future<Database> _initDB(String filePath) async {
+  Future<<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
@@ -29,8 +29,6 @@ class DatabaseHelper {
         biometric_enabled INTEGER NOT NULL DEFAULT 1
       )
     ''');
-
-    // Insert default user
     await db.insert('users', {'pin': '1234', 'biometric_enabled': 1});
 
     // Products table
@@ -39,11 +37,14 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         brand TEXT,
+        category TEXT,
+        unit_size TEXT,
         purchase_price REAL NOT NULL DEFAULT 0,
         sale_price REAL NOT NULL DEFAULT 0,
         opening_stock REAL NOT NULL DEFAULT 0,
         current_stock REAL NOT NULL DEFAULT 0,
-        min_stock_level REAL NOT NULL DEFAULT 10
+        min_stock_level REAL NOT NULL DEFAULT 10,
+        notes TEXT
       )
     ''');
 
@@ -114,9 +115,12 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE purchases (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        supplier TEXT NOT NULL,
+        product_id INTEGER,
+        supplier_name TEXT,
         date TEXT NOT NULL,
-        total_amount REAL NOT NULL DEFAULT 0
+        quantity REAL NOT NULL DEFAULT 0,
+        cost_price REAL NOT NULL DEFAULT 0,
+        total_cost REAL NOT NULL DEFAULT 0
       )
     ''');
 
@@ -142,8 +146,6 @@ class DatabaseHelper {
         language TEXT DEFAULT 'ur'
       )
     ''');
-
-    // Insert default settings
     await db.insert('settings', {
       'business_name': 'Chaudhary Traders',
       'owner_name': '',
@@ -155,7 +157,6 @@ class DatabaseHelper {
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Add users table if upgrading from version 1
       await db.execute('''
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
