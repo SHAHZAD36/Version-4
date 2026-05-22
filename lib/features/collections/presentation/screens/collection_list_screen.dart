@@ -5,7 +5,7 @@ import '../providers/collection_provider.dart';
 import '../../data/models/collection_model.dart';
 import '../../../customers/presentation/providers/customer_provider.dart';
 import '../../../../core/providers/language_provider.dart';
-import '../../../../core/localization/app_strings.dart';
+import '../../../../core/localization/app_strings.dart';  // <-- YEH ADD KARO
 
 class CollectionListScreen extends ConsumerWidget {
   const CollectionListScreen({super.key});
