@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/product_provider.dart';
 import '../../data/models/product_model.dart';
+import '../../../../core/providers/language_provider.dart';
+import '../../../../core/localization/app_strings.dart';
 
 class ProductListScreen extends ConsumerWidget {
   const ProductListScreen({super.key});
@@ -9,14 +11,15 @@ class ProductListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productsProvider);
+    final lang = ref.watch(languageProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('پروڈکٹس (Products)'),
+        title: Text(AppStrings.getText(lang, 'products')),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () => _showSearchDialog(context, ref, lang),
           ),
         ],
       ),
@@ -25,13 +28,13 @@ class ProductListScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+                  const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text('کوئی پروڈکٹ نہیں ملی (No products found)'),
+                  Text(AppStrings.getText(lang, 'no_products')),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => _showAddProductDialog(context, ref),
-                    child: const Text('پہلی پروڈکٹ شامل کریں'),
+                    onPressed: () => _showAddProductDialog(context, ref, lang),
+                    child: Text(AppStrings.getText(lang, 'add_first_product')),
                   ),
                 ],
               ),
@@ -44,7 +47,7 @@ class ProductListScreen extends ConsumerWidget {
                 return Card(
                   child: ListTile(
                     title: Text(product.name),
-                    subtitle: Text('${product.brand ?? ''} | اسٹاک: ${product.currentStock}'),
+                    subtitle: Text('${product.brand ?? ''} | ${AppStrings.getText(lang, 'stock')}: ${product.currentStock}'),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -54,88 +57,22 @@ class ProductListScreen extends ConsumerWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         if (product.currentStock <= product.minStockLevel)
-                          const Text(
-                            'کم اسٹاک',
-                            style: TextStyle(color: Colors.red, fontSize: 10),
+                          Text(
+                            AppStrings.getText(lang, 'low_stock'),
+                            style: const TextStyle(color: Colors.red, fontSize: 10),
                           ),
                       ],
                     ),
-                    onTap: () {},
+                    onTap: () => _showEditProductDialog(context, ref, product, lang),
                   ),
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddProductDialog(context, ref),
+        onPressed: () => _showAddProductDialog(context, ref, lang),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showAddProductDialog(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
-    final brandController = TextEditingController();
-    final purchasePriceController = TextEditingController();
-    final salePriceController = TextEditingController();
-    final stockController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('نئی پروڈکٹ شامل کریں'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'نام (Name)'),
-              ),
-              TextField(
-                controller: brandController,
-                decoration: const InputDecoration(labelText: 'برانڈ (Brand)'),
-              ),
-              TextField(
-                controller: purchasePriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'خرید قیمت (Purchase Price)'),
-              ),
-              TextField(
-                controller: salePriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'فروخت قیمت (Sale Price)'),
-              ),
-              TextField(
-                controller: stockController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'موجودہ اسٹاک (Current Stock)'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('کینسل'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final product = ProductModel(
-                name: nameController.text,
-                brand: brandController.text,
-                purchasePrice: double.tryParse(purchasePriceController.text) ?? 0,
-                salePrice: double.tryParse(salePriceController.text) ?? 0,
-                openingStock: double.tryParse(stockController.text) ?? 0,
-                currentStock: double.tryParse(stockController.text) ?? 0,
-                minStockLevel: 10,
-              );
-              ref.read(productsProvider.notifier).addProduct(product);
-              Navigator.pop(context);
-            },
-            child: const Text('محفوظ کریں'),
-          ),
-        ],
-      ),
-    );
-  }
-}
+  void _showSearchDialog(BuildContext context, WidgetRef ref, AppLanguage lang)
