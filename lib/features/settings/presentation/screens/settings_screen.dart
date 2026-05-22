@@ -10,7 +10,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
   @override ConsumerState createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<<SettingsScreen> {
   late TextEditingController _bizCtrl;
   late TextEditingController _ownerCtrl;
   bool _init = false;
@@ -90,7 +90,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(children: [
                       Text(AppStrings.getText(lang, 'business_info'),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, FontSize: 16)),
                       const SizedBox(height: 16),
                       TextField(controller: _bizCtrl,
                           decoration: InputDecoration(labelText: AppStrings.getText(lang, 'business_name'),
